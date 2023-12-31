@@ -3,7 +3,7 @@ Blazingly fast utility to convert time and bytes into human readable format ⚡
 
 # Install
 ```sh
-pip3 install humans_formatter
+pip3 install humans-formatter
 ```
 
 # Usage
