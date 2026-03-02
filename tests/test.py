@@ -48,3 +48,25 @@ def compare():
 
 
 compare()
+
+
+
+
+"""
+Latest test results
+--------------------
+
+v0.1
+- Is humans faster: True
+- Increased speed by 1.74 times
+- Time took:
+    humans: 0.0069046189998971386
+    origin: 0.01203112999996847
+
+v0.2
+- Is humans faster: True
+- Increased speed by 4.77 times
+- Time took:
+    humans: 0.0029305890000159707
+    origin: 0.013978510000015376
+"""

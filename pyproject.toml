@@ -1,0 +1,7 @@
+[project]
+name = "humans-formatter"
+version = "0.2"
+description = "Utility to convert time and bytes to human readable format"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []

@@ -1,40 +1,36 @@
-// written by a professional
-// please do not attempt to recreate this at home
-// please don't laugh
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <stdio.h>
+#include <stdint.h>
 
-// Convert milliseconds in to string that can be understood by hoomans
-void FnTimeFormatter(double milliseconds, char *result)
+void FnTimeFormatter(double milliseconds, char *result, size_t buf_size)
 {
-    int seconds = (int)milliseconds / 1000;
-    milliseconds = seconds ? (int)milliseconds % 1000 : milliseconds;
-    int minutes = seconds / 60;
-    seconds %= 60;
-    int hours = minutes / 60;
-    minutes %= 60;
-    int days = hours / 24;
-    hours %= 24;
+    int64_t total_ms = (int64_t)milliseconds;
 
-    if (minutes > 0)
+    const int64_t SECOND = 1000;
+    const int64_t MINUTE = 60 * SECOND;
+    const int64_t HOUR = 60 * MINUTE;
+    const int64_t DAY = 24 * HOUR;
+
+    if (total_ms >= DAY)
     {
-        sprintf(result, "%dm", minutes);
+        snprintf(result, buf_size, "%lldd", (long long)(total_ms / DAY));
     }
-    else if (seconds > 0)
+    else if (total_ms >= HOUR)
     {
-        sprintf(result, "%ds", seconds);
+        snprintf(result, buf_size, "%lldh", (long long)(total_ms / HOUR));
     }
-    else if (hours > 0)
+    else if (total_ms >= MINUTE)
     {
-        sprintf(result, "%dh", hours);
+        snprintf(result, buf_size, "%lldm", (long long)(total_ms / MINUTE));
     }
-    else if (days > 0)
+    else if (total_ms >= SECOND)
     {
-        sprintf(result, "%dd", days);
+        snprintf(result, buf_size, "%llds", (long long)(total_ms / SECOND));
     }
     else
     {
-        sprintf(result, "%dms", (int)milliseconds);
+        snprintf(result, buf_size, "%lldms", (long long)total_ms);
     }
 }
 
@@ -43,48 +39,64 @@ static PyObject *py_FnTimeFormatter(PyObject *self, PyObject *args)
     double milliseconds;
     if (!PyArg_ParseTuple(args, "d", &milliseconds))
         return NULL;
-    char result[20];
-    FnTimeFormatter(milliseconds, result);
-    return Py_BuildValue("s", result);
+
+    char result[32]; // Sufficiently large for any 64-bit int + suffix
+    FnTimeFormatter(milliseconds, result, sizeof(result));
+
+    return PyUnicode_FromString(result);
 }
 
-// Convert bytes (as in 1024) to string that can be understood by hoomans
-char *FnHumanBytes(double size)
+void FnHumanBytes(double size, char *result, size_t buf_size)
 {
-    if (size == 0)
+    if (size <= 0)
     {
-        return "";
+        snprintf(result, buf_size, "0 B");
+        return;
     }
-    int power = 1024;
+
+    const char *units[] = {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"};
     int n = 0;
-    const char *pwrN[] = {" ", "Ki", "Mi", "Gi", "Ti"};
-    while (size > power)
+    int max_units = (sizeof(units) / sizeof(units[0])) - 1;
+
+    while (size >= 1024.0 && n < max_units)
     {
-        size /= power;
-        n += 1;
+        size /= 1024.0;
+        n++;
     }
-    static char result[20];
-    sprintf(result, "%.2f %sB", size, pwrN[n]);
-    return result;
+
+    // Format: Integers for bytes, 2 decimal places for others
+    if (n == 0)
+    {
+        snprintf(result, buf_size, "%.0f %s", size, units[n]);
+    }
+    else
+    {
+        snprintf(result, buf_size, "%.2f %s", size, units[n]);
+    }
 }
 
+// Py
 static PyObject *py_FnHumanBytes(PyObject *self, PyObject *args)
 {
     double size;
     if (!PyArg_ParseTuple(args, "d", &size))
         return NULL;
-    char *result = FnHumanBytes(size);
-    return Py_BuildValue("s", result);
+
+    char result[64];
+    FnHumanBytes(size, result, sizeof(result));
+
+    return PyUnicode_FromString(result);
 }
-
-// humans module
 static PyMethodDef HumansMethods[] = {
-    {"human_time", py_FnTimeFormatter, METH_VARARGS, "Format time in milliseconds to human readable format"},
-    {"human_bytes", py_FnHumanBytes, METH_VARARGS, "Convert bytes to human readable format"},
+    {"human_time", py_FnTimeFormatter, METH_VARARGS, "Format milliseconds to the largest relevant unit."},
+    {"human_bytes", py_FnHumanBytes, METH_VARARGS, "Convert bytes to human readable KiB/MiB/etc."},
     {NULL, NULL, 0, NULL}};
-
 static struct PyModuleDef humansmodule = {
-    PyModuleDef_HEAD_INIT, "humans", NULL, -1, HumansMethods};
+    PyModuleDef_HEAD_INIT,
+    "humans",
+    "A module for human-readable data formatting.",
+    -1,
+    HumansMethods};
 
 PyMODINIT_FUNC PyInit_humans(void)
 {
