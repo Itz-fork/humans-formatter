@@ -8,7 +8,7 @@ with open(("README.md"), encoding="utf-8") as readmeh:
 
 setup(
     name="humans_formatter",
-    version="0.1",
+    version="0.2",
     description="Utility to convert time and bytes to human readable format",
     long_description=readme,
     long_description_content_type="text/markdown",

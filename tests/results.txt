@@ -1,0 +1,27 @@
+// Old
+Time Formatter
+ Faster: True
+ Speedup: 2.24x
+ humans: 0.20089104100043187
+ origin: 0.4504016840000986
+
+Human Bytes
+ Faster: True
+ Speedup: 2.00x
+ humans: 0.511764206999942
+ origin: 1.0215564449999874
+
+----------------------------------------
+
+// New
+Time Formatter
+ Faster: True
+ Speedup: 2.00x
+ humans: 0.22573407300023973
+ origin: 0.45203921499978605
+
+Human Bytes
+ Faster: True
+ Speedup: 3.53x
+ humans: 0.2950021460001153
+ origin: 1.0422501029997875
