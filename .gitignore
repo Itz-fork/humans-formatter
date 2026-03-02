@@ -2,3 +2,5 @@
 /.vscode
 /dist
 /humans_formatter.egg-info
+/tests/.venv
+/tests/__pycache__

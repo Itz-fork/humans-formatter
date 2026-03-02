@@ -1,72 +1,42 @@
-# very professional testing script
-# please clap
+from timeit import repeat
 
-from timeit import timeit
+NUMBER = 1_000_000
+REPEAT = 5
 
-
-results = """
-- Is humans faster: {}
-- Increased speed by {} times
-- Time took:
-    humans: {}
-    origin: {}
-"""
-
+def bench(stmt, setup):
+    times = repeat(stmt, setup=setup, number=NUMBER, repeat=REPEAT)
+    return min(times)
 
 def compare():
-    time_cshared = timeit(
-        "humans.human_time(100*60*60)", setup="import humans", number=10000
+    t1 = bench(
+        "f(360000)",
+        "import humans; f = humans.human_time",
     )
-    time_origin = timeit(
-        "origin.TimeFormatter(100*60*60)", setup="import origin", number=10000
-    )
-
-    humanbytes_cshared = timeit(
-        "humans.human_bytes(1024*1024*1024)", setup="import humans", number=10000
-    )
-    humanbytes_origin = timeit(
-        "origin.humanbytes(1024*1024*1024)", setup="import origin", number=10000
+    t2 = bench(
+        "f(360000)",
+        "import origin; f = origin.TimeFormatter",
     )
 
-    print(
-        results.format(
-            time_cshared < time_origin,
-            f"{time_origin / time_cshared:.2f}",
-            time_cshared,
-            time_origin,
-        )
+    b1 = bench(
+        "f(1024*1024*1024)",
+        "import humans; f = humans.human_bytes",
+    )
+    b2 = bench(
+        "f(1024*1024*1024)",
+        "import origin; f = origin.humanbytes",
     )
 
-    print(
-        results.format(
-            humanbytes_cshared < humanbytes_origin,
-            f"{humanbytes_origin / humanbytes_cshared:.2f}",
-            humanbytes_cshared,
-            humanbytes_origin,
-        )
-    )
+    print("Time Formatter")
+    print(" Faster:", t1 < t2)
+    print(" Speedup:", f"{t2/t1:.2f}x")
+    print(" humans:", t1)
+    print(" origin:", t2)
+    print()
 
+    print("Human Bytes")
+    print(" Faster:", b1 < b2)
+    print(" Speedup:", f"{b2/b1:.2f}x")
+    print(" humans:", b1)
+    print(" origin:", b2)
 
 compare()
-
-
-
-
-"""
-Latest test results
---------------------
-
-v0.1
-- Is humans faster: True
-- Increased speed by 1.74 times
-- Time took:
-    humans: 0.0069046189998971386
-    origin: 0.01203112999996847
-
-v0.2
-- Is humans faster: True
-- Increased speed by 4.77 times
-- Time took:
-    humans: 0.0029305890000159707
-    origin: 0.013978510000015376
-"""
