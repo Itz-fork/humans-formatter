@@ -1,3 +1,8 @@
+> [!WARNING]
+> Moved to: https://codeberg.org/partiallywritten/humans-formatter-py
+
+---
+
 # Humans
 Blazingly fast utility to convert time and bytes into human readable format ⚡
 
